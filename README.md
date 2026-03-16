@@ -63,11 +63,11 @@ The device advertises as `network-status-clock.local` on the network.
 
 ## Buttons
 
-| Button | Pin | Short Press |
-|--------|-----|-------------|
-| Left   | G26 | Toggle 12h/24h mode |
-| Middle | G27 | Toggle IP address display on center screen |
-| Right  | G14 | Toggle network status preview (green debug view) |
+| Button | Pin | Short Press | Medium Press | Long Press |
+|--------|-----|-------------|--------------|------------|
+| Left   | G26 | Toggle 12h/24h mode | — | — |
+| Middle | G27 | Toggle IP address on center screen | — | Reboot |
+| Right  | G14 | Toggle status preview / cancel debug | Simulate network outage | Simulate recovery |
 
 ## Configuration Reference
 

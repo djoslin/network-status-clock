@@ -76,6 +76,10 @@ private:
     void toggleStatusPreview();
     void toggleIPDisplay();
     void displayIPAddress(uint32_t color, bool force);
+    void simulateOutage();
+    void simulateRecovery();
+    void cancelDebug();
+    void clearScreen2State();
     uint32_t getClockColor();
 
     NetStatus m_netStatus = NetStatus::NET_OK;
@@ -88,6 +92,7 @@ private:
     int m_consecutiveFails{0};
     int m_consecutiveSuccesses{0};
     bool m_forceStatusView{false};
+    bool m_debugSimulation{false};
     bool m_showIP{false};
     String m_lastIPStr = "";
     uint32_t m_lastClockColor = CLOCK_COLOR;

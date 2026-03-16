@@ -118,7 +118,9 @@ void loop() {
             clockWidget->buttonPressed(BUTTON_LEFT, leftState);
         }
         ButtonState okState = buttonOK.getState();
-        if (okState != BTN_NOTHING) {
+        if (okState == BTN_LONG) {
+            ESP.restart();
+        } else if (okState != BTN_NOTHING) {
             clockWidget->buttonPressed(BUTTON_OK, okState);
         }
         ButtonState rightState = buttonRight.getState();

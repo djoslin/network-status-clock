@@ -160,9 +160,7 @@ NetStatus ClockWidget::getEffectiveNetStatus() {
     return m_netStatus;
 }
 
-void ClockWidget::toggleStatusPreview() {
-    m_forceStatusView = !m_forceStatusView;
-    m_showIP = false;
+void ClockWidget::clearScreen2State() {
     m_manager.selectScreen(2);
     m_manager.clearScreen();
     m_lastDrawnNetStatus = getEffectiveNetStatus();
@@ -170,19 +168,54 @@ void ClockWidget::toggleStatusPreview() {
     m_lastDowntimeMStr = "";
     m_lastAmPm = "";
     m_lastIPStr = "";
+}
+
+void ClockWidget::toggleStatusPreview() {
+    m_forceStatusView = !m_forceStatusView;
+    m_showIP = false;
+    clearScreen2State();
     draw(true);
 }
 
 void ClockWidget::toggleIPDisplay() {
     m_showIP = !m_showIP;
     m_forceStatusView = false;
-    m_manager.selectScreen(2);
-    m_manager.clearScreen();
-    m_lastDrawnNetStatus = getEffectiveNetStatus();
-    m_lastDowntimeHStr = "";
-    m_lastDowntimeMStr = "";
-    m_lastAmPm = "";
-    m_lastIPStr = "";
+    clearScreen2State();
+    draw(true);
+}
+
+void ClockWidget::simulateOutage() {
+    m_debugSimulation = true;
+    m_forceStatusView = false;
+    m_showIP = false;
+    m_netStatus = NetStatus::NET_DOWN;
+    m_downtimeStart = millis();
+    clearScreen2State();
+    draw(true);
+}
+
+void ClockWidget::simulateRecovery() {
+    m_debugSimulation = true;
+    m_forceStatusView = false;
+    m_showIP = false;
+    if (m_netStatus == NetStatus::NET_DOWN) {
+        m_lastDowntimeMs = millis() - m_downtimeStart;
+    }
+    m_netStatus = NetStatus::NET_RECOVERED;
+    m_recoveryStart = millis();
+    clearScreen2State();
+    draw(true);
+}
+
+void ClockWidget::cancelDebug() {
+    m_debugSimulation = false;
+    m_forceStatusView = false;
+    m_showIP = false;
+    m_netStatus = NetStatus::NET_OK;
+    m_consecutiveFails = 0;
+    m_consecutiveSuccesses = 0;
+    m_netCheckPrev = 0; // Force immediate re-check
+    clearScreen2State();
     draw(true);
 }
 
@@ -215,7 +248,7 @@ uint32_t ClockWidget::getClockColor() {
 
 
 void ClockWidget::update(bool force) {
-    if (millis() - m_netCheckPrev >= CLOCK_NET_CHECK_INTERVAL_MS || m_netCheckPrev == 0) {
+    if (!m_debugSimulation && (millis() - m_netCheckPrev >= CLOCK_NET_CHECK_INTERVAL_MS || m_netCheckPrev == 0)) {
         m_netCheckPrev = millis();
         bool internetUp = checkInternet();
 
@@ -306,13 +339,21 @@ void ClockWidget::change24hMode() {
 }
 
 void ClockWidget::buttonPressed(uint8_t buttonId, ButtonState state) {
-    if (state == BTN_SHORT) {
-        if (buttonId == BUTTON_LEFT) {
-            change24hMode();
-        } else if (buttonId == BUTTON_OK) {
-            toggleIPDisplay();
-        } else if (buttonId == BUTTON_RIGHT) {
-            toggleStatusPreview();
+    if (buttonId == BUTTON_LEFT && state == BTN_SHORT) {
+        change24hMode();
+    } else if (buttonId == BUTTON_OK && state == BTN_SHORT) {
+        toggleIPDisplay();
+    } else if (buttonId == BUTTON_RIGHT) {
+        if (state == BTN_SHORT) {
+            if (m_debugSimulation || m_forceStatusView) {
+                cancelDebug();
+            } else {
+                toggleStatusPreview();
+            }
+        } else if (state == BTN_MEDIUM) {
+            simulateOutage();
+        } else if (state == BTN_LONG) {
+            simulateRecovery();
         }
     }
 }
