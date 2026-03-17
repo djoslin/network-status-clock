@@ -28,11 +28,11 @@
 #ifndef CLOCK_NET_RECOVERY_MS
     #define CLOCK_NET_RECOVERY_MS 900000
 #endif
-#ifndef CLOCK_NET_FAIL_THRESHOLD
-    #define CLOCK_NET_FAIL_THRESHOLD 3
+#ifndef CLOCK_NET_FAIL_INTERVAL
+    #define CLOCK_NET_FAIL_INTERVAL 10000
 #endif
-#ifndef CLOCK_NET_RECOVER_THRESHOLD
-    #define CLOCK_NET_RECOVER_THRESHOLD 3
+#ifndef CLOCK_NET_RECOVER_INTERVAL
+    #define CLOCK_NET_RECOVER_INTERVAL 10000
 #endif
 #ifndef CLOCK_SHADOW_COLOR
     #define CLOCK_SHADOW_COLOR 0x20a1
@@ -71,7 +71,6 @@ private:
     void displayStatusScreen(uint32_t color, bool force);
     DigitOffset getOffsetForDigit(const String &digit);
     bool checkInternet();
-    bool checkRouter();
     NetStatus getEffectiveNetStatus();
     void toggleStatusPreview();
     void toggleIPDisplay();
@@ -88,9 +87,8 @@ private:
     unsigned long m_downtimeStart = 0;
     unsigned long m_lastDowntimeMs = 0;
     unsigned long m_recoveryStart = 0;
-    unsigned long m_firstFailTime = 0;
-    int m_consecutiveFails{0};
-    int m_consecutiveSuccesses{0};
+    unsigned long m_failStart = 0;
+    unsigned long m_successStart = 0;
     bool m_forceStatusView{false};
     bool m_debugSimulation{false};
     bool m_showIP{false};

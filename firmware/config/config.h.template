@@ -22,8 +22,8 @@
 #define CLOCK_COLOR_NET_UP 0x07e0       // Green for clock when network recovers
 #define CLOCK_NET_CHECK_INTERVAL_MS 30000 // Internet connectivity check interval in ms (default: 30000)
 #define CLOCK_NET_RECOVERY_MS 900000    // Show green status clock for this long after recovery (default: 15 min)
-#define CLOCK_NET_FAIL_THRESHOLD 3      // Consecutive internet-only failures before declaring down
-#define CLOCK_NET_RECOVER_THRESHOLD 3   // Consecutive successes before declaring recovered
+#define CLOCK_NET_FAIL_INTERVAL 10000   // Internet must be down this long (ms) before declaring outage
+#define CLOCK_NET_RECOVER_INTERVAL 10000 // Internet must be up this long (ms) before declaring recovered
 #define CLOCK_SHADOW_COLOR 0x20a1       // Clock shadow color (Light brown)
 #define CLOCK_SHADOWING true            // Use clock shadow (set to false to disable)
 

@@ -140,19 +140,6 @@ bool ClockWidget::checkInternet() {
     return connected;
 }
 
-bool ClockWidget::checkRouter() {
-    IPAddress gateway = WiFi.gatewayIP();
-    if (gateway == IPAddress(0, 0, 0, 0)) {
-        return false;
-    }
-    WiFiClient client;
-    bool connected = client.connect(gateway, 53, 2000);
-    if (connected) {
-        client.stop();
-    }
-    return connected;
-}
-
 NetStatus ClockWidget::getEffectiveNetStatus() {
     if (m_forceStatusView && m_netStatus == NetStatus::NET_OK) {
         return NetStatus::NET_RECOVERED;
@@ -212,8 +199,8 @@ void ClockWidget::cancelDebug() {
     m_forceStatusView = false;
     m_showIP = false;
     m_netStatus = NetStatus::NET_OK;
-    m_consecutiveFails = 0;
-    m_consecutiveSuccesses = 0;
+    m_failStart = 0;
+    m_successStart = 0;
     m_netCheckPrev = 0; // Force immediate re-check
     clearScreen2State();
     draw(true);
@@ -251,45 +238,35 @@ void ClockWidget::update(bool force) {
     if (!m_debugSimulation && (millis() - m_netCheckPrev >= CLOCK_NET_CHECK_INTERVAL_MS || m_netCheckPrev == 0)) {
         m_netCheckPrev = millis();
         bool internetUp = checkInternet();
+        unsigned long now = millis();
 
         if (internetUp) {
-            m_consecutiveFails = 0;
-            m_consecutiveSuccesses++;
+            m_failStart = 0;
+            if (m_successStart == 0) m_successStart = now;
         } else {
-            // Only count as internet failure if the router is still reachable
-            bool routerUp = checkRouter();
-            if (routerUp) {
-                if (m_consecutiveFails == 0) {
-                    m_firstFailTime = millis();
-                }
-                m_consecutiveFails++;
-            }
-            // If router is also down, it's a WiFi issue — don't count
-            m_consecutiveSuccesses = 0;
+            m_successStart = 0;
+            if (m_failStart == 0) m_failStart = now;
         }
 
         switch (m_netStatus) {
         case NetStatus::NET_OK:
-            if (m_consecutiveFails >= CLOCK_NET_FAIL_THRESHOLD) {
+            if (m_failStart != 0 && now - m_failStart >= CLOCK_NET_FAIL_INTERVAL) {
                 m_netStatus = NetStatus::NET_DOWN;
-                m_downtimeStart = m_firstFailTime;
-                m_consecutiveFails = 0;
+                m_downtimeStart = m_failStart;
             }
             break;
         case NetStatus::NET_DOWN:
-            if (m_consecutiveSuccesses >= CLOCK_NET_RECOVER_THRESHOLD) {
+            if (m_successStart != 0 && now - m_successStart >= CLOCK_NET_RECOVER_INTERVAL) {
                 m_netStatus = NetStatus::NET_RECOVERED;
-                m_lastDowntimeMs = millis() - m_downtimeStart;
-                m_recoveryStart = millis();
-                m_consecutiveSuccesses = 0;
+                m_lastDowntimeMs = now - m_downtimeStart;
+                m_recoveryStart = now;
             }
             break;
         case NetStatus::NET_RECOVERED:
-            if (m_consecutiveFails >= CLOCK_NET_FAIL_THRESHOLD) {
+            if (m_failStart != 0 && now - m_failStart >= CLOCK_NET_FAIL_INTERVAL) {
                 m_netStatus = NetStatus::NET_DOWN;
-                m_downtimeStart = m_firstFailTime;
-                m_consecutiveFails = 0;
-            } else if (millis() - m_recoveryStart >= CLOCK_NET_RECOVERY_MS) {
+                m_downtimeStart = m_failStart;
+            } else if (now - m_recoveryStart >= CLOCK_NET_RECOVERY_MS) {
                 m_netStatus = NetStatus::NET_OK;
             }
             break;
