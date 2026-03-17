@@ -2,6 +2,15 @@
 
 A network-monitoring clock built on the [Info-Orbs](https://brett.tech/collections/electronics-projects/products/info-orbs-full-dev-kit) hardware platform (ESP32 + five round GC9A01 240×240 displays). It displays the current time across the five screens and continuously monitors internet connectivity, changing color to indicate outages and recovery.
 
+**Normal** — amber clock with flashing colon and AM/PM
+![Normal clock](images/normal.jpeg)
+
+**Outage detected** — red clock with downtime counter (hours and minutes stacked)
+![Network down](images/down.jpeg)
+
+**Recovered** — green clock showing last outage duration
+![Network recovered](images/recovered.jpeg)
+
 ## Features
 
 - **Clock display** — Hours and minutes shown as large DSEG7 segment-style digits across four screens, with a flashing colon on the center screen. Supports 12h/24h mode with AM/PM indicator.
