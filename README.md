@@ -8,7 +8,7 @@ A network-monitoring clock built on the [Info-Orbs](https://brett.tech/collectio
 **Outage detected** — red clock with downtime counter (hours and minutes stacked)
 ![Network down](images/down.jpeg)
 
-**Recovered** — green clock showing last outage duration
+**Recovered** — green clock showing last outage duration (displays for 15m after recovery)
 ![Network recovered](images/recovered.jpeg)
 
 ## Features
